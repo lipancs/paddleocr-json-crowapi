@@ -266,7 +266,7 @@ namespace PaddleOCR
             return "error";
         }
         // 执行OCR
-        std::vector<OCRPredictResult> res_ocr = ppocr->ocr(imge, FLAGS_det, FLAGS_rec, FLAGS_cls=false);
+        std::vector<OCRPredictResult> res_ocr = ppocr->ocr(img, FLAGS_det, FLAGS_rec, FLAGS_cls);
         // 获取结果
         std::string res_json = get_ocr_result_json(res_ocr);
         // 结果1：识别成功，无文字（rec未检出）

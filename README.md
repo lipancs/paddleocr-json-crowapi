@@ -18,6 +18,10 @@ API /ocr/recognize/file
 
 
 
+- **以下是原作者项目介绍**
+
+
+
 #### 离线OCR组件 系列项目：
 - **PaddleOCR-json**
 - [RapidOCR-json](https://github.com/hiroi-sora/RapidOCR-json)

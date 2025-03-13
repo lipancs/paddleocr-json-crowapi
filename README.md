@@ -1,3 +1,21 @@
+
+
+在原作者的基础上，提供内建简单的restful API支持，方便调用。使用crow实现。这里特别感谢原作者的工作。
+对Task部分内部方法进行了修改，使其支持restful API调用。
+增加了Task多线程，配置文件增加OCR实例配置：threadnumber，用于配置Task的线程数。通过多个Task实例，初始化多个COR实例。
+初步用jmeter进行了压力测试，未发现严重问题。
+
+下一步：
+对API进行权限认证，API端口配置外移，支持配置文件配置。
+
+
+
+
+
+
+
+
+
 #### 离线OCR组件 系列项目：
 - **PaddleOCR-json**
 - [RapidOCR-json](https://github.com/hiroi-sora/RapidOCR-json)

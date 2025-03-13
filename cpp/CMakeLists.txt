@@ -35,6 +35,7 @@ SET(CUDA_LIB "" CACHE PATH "库的路径")
 SET(CUDNN_LIB "" CACHE PATH "库的路径")
 SET(TENSORRT_DIR "" CACHE PATH "使用TensorRT编译并设置其路径")
 
+
 # 功能相关参数
 option(ENABLE_CLIPBOARD         "启用剪贴板功能。默认关闭。"        OFF)
 option(ENABLE_REMOTE_EXIT       "启用远程关停服务器命令。默认开启。"  ON)
@@ -210,6 +211,7 @@ include_directories("${PADDLE_LIB}/third_party/install/paddle2onnx/include")
 include_directories("${PADDLE_LIB}/third_party/boost")
 include_directories("${PADDLE_LIB}/third_party/eigen3")
 
+
 include_directories("${CMAKE_SOURCE_DIR}/")
 
 if (NOT WIN32)
@@ -347,7 +349,6 @@ foreach(ITEM ${PADDLE_LIB_FILES})
         "$<TARGET_FILE_DIR:${DEMO_NAME}>"
     )
 endforeach()
-
 
 # CMake TARGET安装路径设置
 # 参考OpenCV：

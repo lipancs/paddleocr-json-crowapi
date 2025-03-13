@@ -25,6 +25,7 @@ namespace PaddleOCR
         {
             std::string str = j.dump(-1, ' ', FLAGS_ensure_ascii);
             return str;
+            
         }
         catch (...)
         {
@@ -61,15 +62,16 @@ namespace PaddleOCR
     std::string Task::get_ocr_result_json(const std::vector<OCRPredictResult> &ocr_result)
     {
         nlohmann::json outJ;
-        outJ["code"] = 100;
+        outJ["code"] = 200;
         outJ["data"] = nlohmann::json::array();
         bool isEmpty = true;
         for (int i = 0; i < ocr_result.size(); i++)
         {
             nlohmann::json j;
             j["text"] = ocr_result[i].text;
-            j["score"] = ocr_result[i].score;
+            j["confidence"] = ocr_result[i].score;
             std::vector<std::vector<int>> b = ocr_result[i].box;
+            /*std::cout << ocr_result[i].score << std::endl;*/
             // 无包围盒
             if (b.empty())
             {
@@ -80,13 +82,16 @@ namespace PaddleOCR
                         b.push_back(std::vector<int>{-1, -1});
             }
             // 启用了rec仍没有文字，跳过本组
-            if (FLAGS_rec && (j["score"] <= 0 || j["text"] == ""))
+            if (FLAGS_rec && (j["confidence"] <= 0 || j["text"] == ""))
             {
                 continue;
             }
             else
             {
-                j["box"] = {{b[0][0], b[0][1]}, {b[1][0], b[1][1]}, {b[2][0], b[2][1]}, {b[3][0], b[3][1]}};
+                //j["position"] = {{b[0][0], b[0][1]}, {b[1][0], b[1][1]}, {b[2][0], b[2][1]}, {b[3][0], b[3][1]}};
+                j["position"] = {
+               {"tl",{{"x", b[0][0]}, {"y", b[0][1]}}},{"tr",{{"x", b[1][0]}, {"y", b[1][1]}}},{"br",{{"x", b[2][0]}, {"y", b[2][1]}}},{"bl",{{"x", b[3][0]}, {"y", b[3][1]}}}
+                };
             }
             // 如果启用了cls，则cls_label有实际值，那么写入方向分类相关参数
             if (ocr_result[i].cls_label != -1)
@@ -114,6 +119,8 @@ namespace PaddleOCR
         try
         {
             decoded_string = base64_decode(b64str);
+
+
         }
         catch (...)
         {
@@ -140,6 +147,7 @@ namespace PaddleOCR
     // 输入json字符串，解析并读取Mat
     cv::Mat Task::imread_json(std::string &str_in)
     {
+
 #ifdef ENABLE_REMOTE_EXIT
         if (str_in == "exit")
         { // 退出指令
@@ -177,6 +185,7 @@ namespace PaddleOCR
                 if (vallen > 2 && value[0] == '\"' && value[vallen - 1] == '\"')
                 {
                     value = value.substr(1, vallen - 2); // 删去nlohmann字符串的两端引号
+                    
                 }
                 // 提取图片
                 if (!is_image_found)
@@ -239,6 +248,81 @@ namespace PaddleOCR
             return res_json;
         }
     }
+
+
+
+
+
+
+
+    std::string Task::ocr_uploadimg_mode(cv::Mat img)
+    {
+        Task::memory_check_cleanup();
+        set_state();
+        cv::Mat imge = img;
+        if (img.empty())
+        { // 读图失败
+            std::cout << get_state_json() << std::endl;
+            return "error";
+        }
+        // 执行OCR
+        std::vector<OCRPredictResult> res_ocr = ppocr->ocr(imge, FLAGS_det, FLAGS_rec, FLAGS_cls=false);
+        // 获取结果
+        std::string res_json = get_ocr_result_json(res_ocr);
+        // 结果1：识别成功，无文字（rec未检出）
+        if (res_json.empty())
+        {
+            std::cout << get_state_json(CODE_OK_NONE, MSG_OK_NONE(FLAGS_image_path)) << std::endl;
+        }
+        // 结果2：识别成功，有文字
+        else
+        {
+            std::cout << res_json << std::endl;
+            return res_json;
+        }
+        return "empty";
+    }
+
+
+
+    std::string Task::run_ocrs(std::string str_in)
+    {
+        Task::memory_check_cleanup();
+        cv::Mat img = imread_json(str_in);
+        if (is_exit)
+        { // 退出
+            return "";
+        }
+        if (img.empty())
+        { // 读图失败
+            return get_state_json();
+        }
+        // 执行OCR
+        std::this_thread::sleep_for(std::chrono::seconds(5));//测试加入延迟5秒
+        std::vector<OCRPredictResult> res_ocr = ppocr->ocr(img, FLAGS_det, FLAGS_rec, FLAGS_cls);
+        // 获取结果
+        std::string res_json = get_ocr_result_json(res_ocr);
+        std::ofstream log_file("1.log", std::ios::out | std::ios::app);
+        if (log_file.is_open())
+        {
+            log_file << res_json << std::endl;
+            log_file.close();
+        }
+        // 结果1：识别成功，无文字（rec未检出）
+        if (res_json.empty())
+        {
+            return get_state_json(CODE_OK_NONE, MSG_OK_NONE(FLAGS_image_path));
+        }
+        // 结果2：识别成功，有文字
+        else
+        {
+            return res_json;
+        }
+    }
+
+
+
+
 
     void Task::init_engine()
     {
@@ -316,6 +400,15 @@ namespace PaddleOCR
     }
 
     // 入口
+    int Task::init_engines() //跳过三种模式直接外部初始化OCR引擎
+    {
+        auto init_start = std::chrono::steady_clock::now();
+        this->ppocr.reset(new PPOCR()); // 创建引擎实例，管理权移交给智能指针 ppocr
+        auto init_end = std::chrono::steady_clock::now();
+        std::chrono::duration<double> duration = init_end - init_start;
+        std::cerr << "OCR init time: " << duration.count() << "s" << std::endl;
+        return 0;
+    }
     int Task::ocr()
     {
         Task::init_engine(); // 初始化引擎

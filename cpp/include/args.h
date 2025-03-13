@@ -74,7 +74,8 @@ DECLARE_bool(rec);
 DECLARE_bool(cls);
 DECLARE_bool(table);
 DECLARE_bool(layout);
-
+//Task多线程线程数量
+DECLARE_int32(threadnumber);
 // 读取配置文件
 std::string read_config();
 // 检测参数合法性

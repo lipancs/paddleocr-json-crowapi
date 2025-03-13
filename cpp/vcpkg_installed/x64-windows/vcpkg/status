@@ -1,0 +1,32 @@
+Package: vcpkg-cmake-config
+Version: 2024-05-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: d2a395942f62684c7c0de3206c4fcae9e8ebecf59bcf649467b9e190bc93abda
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2024-04-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 409e179674dfd202130d64136e6fcd15f4f04c8e6bfadfe7a5bb414a89149179
+Status: install ok installed
+
+Package: asio
+Version: 1.32.0
+Depends: vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: f5060697fce91b9ec6fff448f6da43c9ab451e6f63225f1e2ffd87ef2e6e0425
+Description: Asio is a cross-platform C++ library for network and low-level I/O programming that provides developers with a consistent asynchronous model using a modern C++ approach.
+Status: install ok installed
+
+Package: crow
+Version: 1.2.1.2
+Depends: asio, vcpkg-cmake, vcpkg-cmake-config
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 3e72b68806299f5c3d3c39f0246f60617e22cc393ad9a86e3d1655f0b73ecf25
+Description: Very fast and easy to use C++ micro web framework
+Status: install ok installed
+

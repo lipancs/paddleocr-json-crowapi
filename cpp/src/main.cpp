@@ -26,7 +26,9 @@
 #include <include/paddleocr.h>
 #include <include/paddlestructure.h>
 #include <include/task.h>
-
+#include "crow.h"
+#include"include/multiTaskManager.h"
+#include <future>
 using namespace PaddleOCR;
 
 void structure(std::vector<cv::String> &cv_all_img_names)
@@ -97,6 +99,9 @@ void structure(std::vector<cv::String> &cv_all_img_names)
 
 int main(int argc, char **argv)
 {
+
+   
+
     std::cout << PROJECT_NAME << std::endl; // 版本提示
     // 设置gflags并读取命令行
     google::SetUsageMessage("PaddleOCR-json [FLAG1=ARG1] [FLAG2=ARG2]");
@@ -116,16 +121,84 @@ int main(int argc, char **argv)
         return 1;
     }
 
+
     // 启动任务
-    Task task = Task();
-    if (FLAGS_type == "ocr")
-    { // OCR图片模式
-        return task.ocr();
-    }
-    // TODO: 图表识别模式
-    else if (FLAGS_type == "structure")
-    {
-        std::cerr << "[ERROR] structure not support. " << std::endl;
-        // structure(cv_all_img_names);
-    }
+   // Task task = Task();
+    // multiTaskManager manager(2);
+   // task.init_engines();//初始化ocr引擎
+
+
+    multiTaskManager manager(FLAGS_threadnumber);
+
+  
+   crow::SimpleApp app;
+    CROW_ROUTE(app, "/test")([]() {
+        return "Hello world";
+        });
+
+
+    ////文件流方式识别方式
+    CROW_ROUTE(app, "/ocr/recognize/file").methods(crow::HTTPMethod::Post)([&manager](const crow::request& req) {
+        crow::multipart::message msg(req);
+
+        if (msg.parts.empty()) {
+            return crow::response(400, "File not found");
+        }
+
+        auto& file_part = msg.parts[0];
+        std::vector<char> file_data(file_part.body.begin(), file_part.body.end());
+        cv::Mat img = cv::imdecode(file_data, cv::IMREAD_COLOR);
+        if (img.empty()) {
+            return crow::response(400, "Invalid image file");
+        }
+        auto future_result= manager.submit_task(img);
+
+        //    //std::string file_path = "./uploaded_image.png";
+        //    //if (!cv::imwrite(file_path, img)) {
+        //    //    return crow::response(500, "Failed to save image");
+        //    //}
+         return crow::response{ 200,future_result.get()};
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    app.port(18080).multithreaded().run();
+
+
+
+
+
+    //if (FLAGS_type == "ocr")
+    //{ // OCR图片模式
+    //    return task.ocr();
+    //    
+    //}
+    //// TODO: 图表识别模式
+    //else if (FLAGS_type == "structure")
+    //{
+    //    std::cerr << "[ERROR] structure not support. " << std::endl;
+    //    // structure(cv_all_img_names);
+    //}
+    
 }

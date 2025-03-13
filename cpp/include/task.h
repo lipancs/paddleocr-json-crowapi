@@ -66,7 +66,9 @@ namespace PaddleOCR
 
     public:
         int ocr(); // OCR图片
-
+		int init_engines(); // 跳过三种模式直接外部初始化OCR引擎
+        std::string run_ocrs(std::string);//通过api方式直接执行ocr
+        std::string ocr_uploadimg_mode(cv::Mat);
     private:
         bool is_exit = false;         // 为true时退出任务循环
         std::unique_ptr<PPOCR> ppocr; // OCR引擎智能指针

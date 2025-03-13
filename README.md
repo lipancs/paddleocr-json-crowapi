@@ -12,7 +12,9 @@
 
 
 
-
+默认只写了一个简单的API，可以通过post请求，传入图片，返回识别结果。
+API /ocr/recognize/file
+请求方式：POST,只接受图片上传，返回json格式的识别结果。
 
 
 

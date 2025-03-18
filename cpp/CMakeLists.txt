@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 3.14)
 project(PaddleOCR-json CXX C)
 
+
+
+
+#linux下自行添加
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_BINARY_DIR "/home/lipancs/clworkspace/clionbuild")
+#set(PADDLE_LIB "/opt/PaddleOCR-json/cpp/.source/paddle_inference_manylinux_cpu_avx_mkl_gcc8.2/")
+#set(MODELS "/opt/PaddleOCR-json/cpp/.source/models")
+#set(OPENCV_DIR "/opt/PaddleOCR-json/cpp/.source/opencv-release")
+
+
+
+
+
 # 消除CMake Policy CMP0048警告
 # 让CMake以新的模式来处理policy CMP0048
 # https://cmake.org/cmake/help/latest/policy/CMP0048.html

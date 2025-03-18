@@ -27,7 +27,7 @@
 #include <include/paddlestructure.h>
 #include <include/task.h>
 #include "crow.h"
-#include"include/multiTaskManager.h"
+#include "include/multiTaskManager.h"
 #include <future>
 using namespace PaddleOCR;
 
